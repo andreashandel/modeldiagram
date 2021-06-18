@@ -136,8 +136,14 @@ prepare_diagram <- function(model_list,
                               varnames = NULL,
                               use_varnames = FALSE,
                               var_label_size = 10,
-                              varlocations = NULL)
+                              varlocations = NULL,
+                              var_box_scaling_factor_x = 1,
+                              var_box_scaling_factor_y = 1)
                             ) {
+
+  # pull scalers from model_settings
+  var_box_scaling_factor_x <- model_settings$var_box_scaling_factor_x
+  var_box_scaling_factor_y <- model_settings$var_box_scaling_factor_y
 
   # check user inputs for necessary elements
   check <- check_model_list(model_list)
@@ -604,12 +610,12 @@ prepare_diagram <- function(model_list,
     ndf$x <- NA
     ndf$y <- NA
     for(rid in unique(ndf$row)) {
-      ndf[which(ndf$row == rid), "x"] <- (1:nrow(ndf[which(ndf$row == rid), ])*3)-3
-      ndf[which(ndf$row == rid), "y"] <- (as.numeric(rid) * -2)+2
+      ndf[which(ndf$row == rid), "x"] <- (1:nrow(ndf[which(ndf$row == rid), ])*3*var_box_scaling_factor_x)-3
+      ndf[which(ndf$row == rid), "y"] <- (as.numeric(rid) * -2 * var_box_scaling_factor_y)+2
     }
   } else {
-    ny <- (1:nrow(nodes_matrix) * -2)+2
-    nx <- (1:ncol(nodes_matrix) * 3)-3
+    ny <- (1:nrow(nodes_matrix) * -2 * var_box_scaling_factor_y)+2
+    nx <- (1:ncol(nodes_matrix) * 3 * var_box_scaling_factor_x)-3
     for(nid in varnames) {
       pos <- which(nodes_matrix == nid, arr.ind = TRUE)
       ndf[which(ndf$label == nid), "x"] <- nx[pos[1, 2]]
@@ -619,8 +625,8 @@ prepare_diagram <- function(model_list,
 
   # Add xmin/max and ymin/max columns for node rectangles
   # I use a 0.5 offset in both directions, creating a 1x1 sized square.
-  xoff <- 0.5  # default
-  yoff <- 0.5  # default
+  xoff <- 0.5 * var_box_scaling_factor_x  # default
+  yoff <- 0.5 * var_box_scaling_factor_y  # default
   ndf$xmin <- with(ndf, x - xoff)
   ndf$xmax <- with(ndf, x + xoff)
   ndf$ymin <- with(ndf, y - yoff)
@@ -632,7 +638,7 @@ prepare_diagram <- function(model_list,
   for(id in inflownodes) {
     newxyid <- edf[which(edf$from == id), "to"]
     newxy <- ndf[which(ndf$id == newxyid), c("x", "y")]
-    newxy$y <- newxy$y + 2  # above the variable
+    newxy$y <- newxy$y + 2 # above the variable
     ndf[which(ndf$id == id), c("x", "y")] <- newxy
 
     # set min/max to midpoint for ease because these are not actually
@@ -646,7 +652,7 @@ prepare_diagram <- function(model_list,
   for(id in outflownodes) {
     newxyid <- edf[which(edf$to == id), "from"]
     newxy <- ndf[which(ndf$id == newxyid), c("x", "y")]
-    newxy$y <- newxy$y - 2  # below the variable
+    newxy$y <- newxy$y - 2 # below the variable
     ndf[which(ndf$id == id), c("x", "y")] <- newxy
 
     # set min/max to midpoint for ease because these are not actually
@@ -793,6 +799,8 @@ prepare_diagram <- function(model_list,
         if(cdf[i, "xstart"] == cdf[i, "xend"]) {
           cdf[i, "xstart"] <- cdf[i, "xstart"] + xoff
           cdf[i, "ystart"] <- cdf[i, "ystart"] - yoff
+        } else{
+          cdf[i, "ystart"] <- cdf[i, "ystart"] + yoff - 0.5
         }
       }
     }

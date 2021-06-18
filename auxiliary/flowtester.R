@@ -7,12 +7,13 @@ varnames = c("Susceptible","Infected","Recovered")
 varlocations = matrix(data = c("S", "", "R",
                                "", "I", "" ),nrow = 2, ncol = 3, byrow = TRUE)
 model_list = list(varlabels = varlabels, flows = flows)
-model_settings = list(varnames = varnames)
+model_settings = list(varnames = varnames,
+                      var_box_scaling_factor_x=3,
+                      var_box_scaling_factor_y = 2)
 diagram_list <- prepare_diagram(model_list, model_settings)
 
-?make_diagram()
 
-make_diagram(diagram_list)
+make_diagram(diagram_list,  diagram_settings = list(with_grid = TRUE))
 make_diagram(diagram_list, diagram_settings = list(main_flow_on = FALSE))
 make_diagram(diagram_list, diagram_settings = list(external_flow_on = FALSE))
 make_diagram(diagram_list, diagram_settings = list(interaction_flow_on = FALSE))
